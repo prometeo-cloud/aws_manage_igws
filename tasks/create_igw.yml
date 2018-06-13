@@ -1,0 +1,30 @@
+---
+- name: Get Internet Gateway facts
+  include_role:
+    name: aws_manage_igws
+    tasks_from: "get_internet_gateway_facts"
+  vars:
+    vpc_igw_tag: "{{ igw.aws_igw_name }}"
+
+- block:
+    - name: Get VPC Information
+      include_role:
+        name: "aws_manage_vpc"
+        tasks_from: "get_vpc_facts"
+      vars:
+        vpc_tag: "{{ igw.aws_igw_vpc }}"
+
+    - name: Create Internet Gateway {{ igw.aws_igw_name }}
+      ec2_vpc_igw:
+        aws_access_key: "{{ aws_access_key | default(omit) }}"
+        aws_secret_key: "{{ aws_secret_key | default(omit) }}"
+        vpc_id: "{{ vpc_net_facts.vpcs[0].id }}"
+        region: "{{ igw.aws_igw_region }}"
+        tags: "{{ igw.aws_igw_tag  }}"
+        state: present
+      register: new_igw
+
+    - name: Update Name tag value
+      command: "aws ec2 create-tags --resources {{ new_igw.gateway_id }} --tags Key=\"Name\",Value=\"{{ igw.aws_igw_name | upper }}\""
+  when: igw_facts.internet_gateways == []
+...

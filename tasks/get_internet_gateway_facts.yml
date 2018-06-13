@@ -1,0 +1,10 @@
+---
+- name: Gather facts about a filtered list of Internet Gateways
+  ec2_vpc_igw_facts:
+    aws_access_key: "{{ aws_access_key | default(omit) }}"
+    aws_secret_key: "{{ aws_secret_key | default(omit) }}"
+    region: "{{ aws_region }}"
+    filters:
+        "tag:Name": "{{ vpc_igw_tag }}"
+  register: igw_facts
+...

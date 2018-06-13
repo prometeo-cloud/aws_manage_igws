@@ -1,0 +1,18 @@
+---
+- name: Create Internet Gateways
+  include_tasks: create_igw.yml
+  with_items:
+    - "{{ aws_vpc_igws }}"
+  loop_control:
+    loop_var: igw
+  when: (arg_action is not defined) or (arg_action != 'delete')
+
+- name: Delete Internet Gateways
+  include_tasks: delete_igw.yml
+  with_items:
+    - "{{ aws_vpc_igws }}"
+  loop_control:
+    loop_var: igw
+  when: (arg_action is defined) and (arg_action == 'delete')
+
+...
